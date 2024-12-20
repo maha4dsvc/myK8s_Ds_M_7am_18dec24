@@ -1,0 +1,47 @@
+Set up Docker
+ON 3 servers( on master  and nodes)
+Create  3 aws ec2  instance with  ubuntu 20 and t2.medium 
+sudo apt-get update
+sudo apt-get install docker.io -y
+sudo systemctl enable docker
+sudo systemctl restart docker
+Install Kubernetes
+ON 3 servers( on master  and nodes)
+sudo apt-get update
+sudo apt-get install -y apt-transport-https ca-certificates curl gpg
+
+sudo mkdir -p -m 755 /etc/apt/keyrings
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+
+
+echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.30/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+sudo apt-get update
+
+sudo apt-get install -y kubelet kubeadm kubectl
+
+sudo apt-mark hold kubelet kubeadm kubectl
+
+sudo systemctl enable --now kubelet
+
+ON Master only:
+      12) sudo kubeadm init --pod-network-cidr=10.244.0.0/16 
+ mkdir -p $HOME/.kube
+ sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+sudo kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+
+
+
+
+ON All NODES:
+      
+kubeadm join --discovery-token abcdef.1234567890abcdef --discovery-token-ca-cert-hash sha256:1234..cdef 1.2.3.4:6443
+ON Master:
+kubectl get nodes
+kubectl get pods
+
+
+
+
+
+
